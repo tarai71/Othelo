@@ -9,7 +9,18 @@ public class main : MonoBehaviour {
 	public GUIStyle labelStylePieceType;
 	public GUIStyle labelStyleGameOver;
 	
-	int[,] board = new int[8,8]{
+	enum STATUS {
+		PLAY = 0,
+		GAMEOVER
+	}
+
+	enum PIECE {
+		EMPTY = 0,
+		BLACK,
+		WHITE,
+	}
+	
+	PIECE[,] board = new PIECE[8,8]{
 		{0,0,0,0,0,0,0,0},
 		{0,0,0,0,0,0,0,0},
 		{0,0,0,0,0,0,0,0},
@@ -20,18 +31,23 @@ public class main : MonoBehaviour {
 		{0,0,0,0,0,0,0,0}
 	};
 	GameObject[,] pieceList = new GameObject[8,8];
-	int pieceType = 0;
+	PIECE pieceType = PIECE.EMPTY;
 	int white = 0;
 	int black = 0;
-	string gamestatus = "play";
+	STATUS gamestatus = STATUS.PLAY;
 	ArrayList markerList = new ArrayList();
 		
 	// Use this for initialization
 	void Start () {
-		pieceType = 2; putPiece(new Vector2(3,4));
-		pieceType = 1; putPiece(new Vector2(3,3));
-		pieceType = 1; putPiece(new Vector2(4,4));
-		pieceType = 2; putPiece(new Vector2(4,3));
+		for (int x=0; x<board.GetLength(0); x++) {
+			for (int y=0; y<board.GetLength(1); y++) {
+				board[x,y] = PIECE.EMPTY;	
+			}
+		}
+		pieceType = PIECE.BLACK; putPiece(new Vector2(3,4));
+		pieceType = PIECE.WHITE; putPiece(new Vector2(3,3));
+		pieceType = PIECE.WHITE; putPiece(new Vector2(4,4));
+		pieceType = PIECE.BLACK; putPiece(new Vector2(4,3));
 	
 	}
 	
@@ -49,7 +65,7 @@ public class main : MonoBehaviour {
 		if (board[(int)key.x,(int)key.y] != 0) {
 			return;
 		}
-		if (gamestatus != "play") {
+		if (gamestatus != STATUS.PLAY) {
 			return;
 		}
 			
@@ -73,21 +89,21 @@ public class main : MonoBehaviour {
 			pieceList[(int)key.x, (int)key.y] = (GameObject)Instantiate(piecePrefab, position, rotation);
 			for (int i=0; i<board.GetLength(0); i++) {
 				for (int j=0; j<board.GetLength(1); j++) {
-					if (board[i,j] == 1) {
+					if (board[i,j] == PIECE.BLACK) {
 						pieceList[i, j].renderer.material.color = new Color(0,0,0,255);
-					} else if (board[i,j] == 2) {
+					} else if (board[i,j] == PIECE.WHITE) {
 						pieceList[i, j].renderer.material.color = new Color(255,255,255,255);
 					}
 				}
 			}
-			pieceType = pieceType == 1 ? 2 : 1;
+			pieceType = pieceType == PIECE.WHITE ? PIECE.BLACK : PIECE.WHITE;
 			// 置くところが無いかチェック/
 			foreach(Object obj in markerList) {
 				Object.Destroy(obj);
 			}
 			ArrayList enablePutList = new ArrayList();
 			if (!checkEnablePut(ref enablePutList) && !initialFlag) {
-				pieceType = pieceType == 1 ? 2 : 1;
+				pieceType = pieceType == PIECE.WHITE ? PIECE.BLACK : PIECE.WHITE;
 				// 攻守交代2回してどこも置けなかったらそのゲームは終了/
 				if (!checkEnablePut(ref enablePutList) && !initialFlag) {
 					StartCoroutine("GameOver");
@@ -105,7 +121,7 @@ public class main : MonoBehaviour {
 	}
 	IEnumerator GameOver() {
 		Debug.Log("game over");
-		gamestatus = "gameover";
+		gamestatus = STATUS.GAMEOVER;
 		yield return new WaitForSeconds(2.0f);
 		//while (!Input.GetButtonDown("Fire1") || Input.touches.Length > 0) yield return;
 
@@ -293,7 +309,7 @@ public class main : MonoBehaviour {
 				foreach (ArrayList val in revList) {
 					foreach (Vector2 v in val) {
 						pieceList[(int)v.x, (int)v.y].transform.rotation *= Quaternion.AngleAxis(180, new Vector3(1,0,0));
-						board[(int)v.x, (int)v.y] = (board[(int)v.x, (int)v.y] == 1) ? 2 : 1;
+						board[(int)v.x, (int)v.y] = (board[(int)v.x, (int)v.y] == PIECE.WHITE) ? PIECE.BLACK : PIECE.WHITE;
 					} 
 				}
 			}
@@ -308,9 +324,9 @@ public class main : MonoBehaviour {
 		int _black = 0;
 		for (int x=0; x<board.GetLength(0); x++) {
 			for (int y=0; y<board.GetLength(1); y++) {
-				if (board[x,y] == 1) {
+				if (board[x,y] == PIECE.BLACK) {
 					_black += 1;
-				} else if (board[x,y] == 2) {
+				} else if (board[x,y] == PIECE.WHITE) {
 					_white += 1;
 				}
 			}
@@ -324,11 +340,11 @@ public class main : MonoBehaviour {
 		GUI.Label(rect_score, "WHITE:" + white + "\nBLACK:" + black, labelStyleScore);
 		
 		Rect rect_piece = new Rect(0, 30, Screen.width, Screen.height);
-		var piece = pieceType == 1 ? "black" : "white";
+		var piece = pieceType == PIECE.WHITE ? "black" : "white";
 		GUI.Label(rect_piece, piece, labelStylePieceType);
 		
 		Rect rect_gameover = new Rect(0, Screen.height / 2 - 25, Screen.width, 50);
-		if (gamestatus == "gameover") {
+		if (gamestatus == STATUS.GAMEOVER) {
 			string result = "";
 			if (white > black) {
 				result = "white won!";
