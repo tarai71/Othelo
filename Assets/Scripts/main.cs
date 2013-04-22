@@ -16,8 +16,8 @@ public class main : MonoBehaviour {
 	
 	public GameObject piecePrefab;
 	public GameObject markerPrefab;
-	public GUIStyle labelStyleScore;
-	public GUIStyle labelStylePieceType;
+	public GUIStyle labelStyleScoreBlack;
+	public GUIStyle labelStyleScoreWhite;
 	public GUIStyle labelStyleGameOver;
 	
 	PIECE_TYPE[,] board = new PIECE_TYPE[8,8];
@@ -44,8 +44,25 @@ public class main : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+		byte alfa;
+		alfa = (Time.time % 1.0f < 0.5f)? (byte)((Time.time % 1.0f) * 255 + 127) : (byte)((1.0f - Time.time % 1.0f) * 255 + 127);
+		
+		foreach(GameObject obj in markerList) {
+			if(obj) {
+				obj.renderer.material.color = new Color32(209,221, 48,alfa);
+			}
+		}
+		
+		if(pieceType == PIECE_TYPE.BLACK) {
+			labelStyleScoreBlack.normal.textColor = new Color32(209,221, 48,alfa);
+			labelStyleScoreWhite.normal.textColor = new Color32(193,193,193,255);
+		} else {
+			labelStyleScoreBlack.normal.textColor = new Color32(193,193,193,255);
+			labelStyleScoreWhite.normal.textColor = new Color32(209,221, 48,alfa);
+		}
+		
 	}
+
 
 	// 駒を盤に置く/
 	void putPiece(Vector2 key)
@@ -327,24 +344,25 @@ public class main : MonoBehaviour {
 	}
 	
 	void OnGUI() {
-		Rect rect_score = new Rect(0, 0, Screen.width, Screen.height);
-		GUI.Label(rect_score, "WHITE:" + white + "\nBLACK:" + black, labelStyleScore);
-		
-		Rect rect_piece = new Rect(0, 30, Screen.width, Screen.height);
-		var piece = pieceType == PIECE_TYPE.BLACK ? "black" : "white";
-		GUI.Label(rect_piece, piece, labelStylePieceType);
-		
-		Rect rect_gameover = new Rect(0, Screen.height / 2 - 25, Screen.width, 50);
+		GUI.Box(new Rect(10,10,100,80), "BLACK");
+		GUI.Label(new Rect(10,10,100,80), black.ToString("d2"), labelStyleScoreBlack);
+		GUI.Box(new Rect(10,100,100,80), "WHITE");
+		GUI.Label(new Rect(10,100,100,80), white.ToString("d2"), labelStyleScoreWhite);
+
+		Rect rect_gameover = new Rect(Screen.width / 2 - 300, Screen.height / 2 - 50, 600, 100);
 		if (gamestatus == GAME_STATUS.GAMEOVER) {
 			string result = "";
 			if (white > black) {
-				result = "white won!";
+				result = "WHITE WON!";
 			} else if (white < black) {
-				result = "black won!";
+				result = "BLACK WON!";
 			} else {
-				result = "draw...";
+				result = "DRAW";
 			}
+			GUI.Box(rect_gameover, "");
+			GUI.Box(rect_gameover, "");
 			GUI.Label(rect_gameover, result, labelStyleGameOver);
 		}
+
 	}
 }
