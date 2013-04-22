@@ -20,21 +20,12 @@ public class main : MonoBehaviour {
 		WHITE,
 	}
 	
-	PIECE[,] board = new PIECE[8,8]{
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0}
-	};
+	STATUS gamestatus = STATUS.PLAY;
+	PIECE[,] board = new PIECE[8,8];
 	GameObject[,] pieceList = new GameObject[8,8];
 	PIECE pieceType = PIECE.EMPTY;
 	int white = 0;
 	int black = 0;
-	STATUS gamestatus = STATUS.PLAY;
 	ArrayList markerList = new ArrayList();
 		
 	// Use this for initialization
@@ -46,7 +37,7 @@ public class main : MonoBehaviour {
 		}
 		pieceType = PIECE.BLACK; putPiece(new Vector2(3,4));
 		pieceType = PIECE.WHITE; putPiece(new Vector2(3,3));
-		pieceType = PIECE.WHITE; putPiece(new Vector2(4,4));
+//		pieceType = PIECE.WHITE; putPiece(new Vector2(4,4));
 		pieceType = PIECE.BLACK; putPiece(new Vector2(4,3));
 	
 	}
@@ -62,7 +53,7 @@ public class main : MonoBehaviour {
 		if (key.x < 0 || key.y < 0 || key.x > 7 || key.y > 7) {
 			return;
 		}
-		if (board[(int)key.x,(int)key.y] != 0) {
+		if (board[(int)key.x,(int)key.y] != PIECE.EMPTY) {
 			return;
 		}
 		if (gamestatus != STATUS.PLAY) {
@@ -116,9 +107,26 @@ public class main : MonoBehaviour {
 			enablePutList.Clear();
 		} else {
 			Debug.Log("cannot put here");
-			board[(int)key.x,(int)key.y] = 0;
+			board[(int)key.x,(int)key.y] = PIECE.EMPTY;
 		}
-	}
+
+		// for debug
+		string _s = "";
+		for (int i=0; i<board.GetLength(0); i++) {
+			_s = _s + '\n';
+			for (int j=0; j<board.GetLength(1); j++) {
+				if(board[i,j] == PIECE.BLACK ) {
+					_s = _s + 'B';
+				} else if(board[i,j] == PIECE.WHITE ) {
+					_s = _s + 'W';
+				} else {
+					_s = _s + 'E';
+				}
+			}
+		}
+		Debug.Log(_s);
+}
+	
 	IEnumerator GameOver() {
 		Debug.Log("game over");
 		gamestatus = STATUS.GAMEOVER;
@@ -133,7 +141,7 @@ public class main : MonoBehaviour {
 	bool checkEnablePut(ref ArrayList list) {
 		for (int x=0; x<board.GetLength(0); x++) {
 			for (int y=0; y<board.GetLength(1); y++) {
-				if (board[x,y] == 0 && updateBoard(new Vector2(x,y),false)) {
+				if (board[x,y] == PIECE.EMPTY && updateBoard(new Vector2(x,y),false)) {
 					list.Add(new Vector2(x,y));
 				}
 			}
@@ -156,9 +164,9 @@ public class main : MonoBehaviour {
 				revList[0].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE.EMPTY && board[ix,iy] != pieceType) {
 				revList[0].Add(new Vector2(ix, iy));
-			} else if (revList[0].Count > 0 && board[ix,iy] != 0) {
+			} else if (revList[0].Count > 0 && board[ix,iy] != PIECE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
@@ -175,9 +183,9 @@ public class main : MonoBehaviour {
 				revList[1].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE.EMPTY && board[ix,iy] != pieceType) {
 				revList[1].Add(new Vector2(ix,iy));
-			} else if (revList[1].Count > 0 && board[ix,iy] != 0) {
+			} else if (revList[1].Count > 0 && board[ix,iy] != PIECE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
@@ -195,9 +203,9 @@ public class main : MonoBehaviour {
 				revList[2].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE.EMPTY && board[ix,iy] != pieceType) {
 				revList[2].Add(new Vector2(ix, iy));
-			} else if (revList[2].Count > 0 && board[ix,iy] != 0) {
+			} else if (revList[2].Count > 0 && board[ix,iy] != PIECE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
@@ -214,9 +222,9 @@ public class main : MonoBehaviour {
 				revList[3].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE.EMPTY && board[ix,iy] != pieceType) {
 				revList[3].Add(new Vector2(ix, iy));
-			} else if (revList[3].Count > 0 && board[ix,iy] != 0) {
+			} else if (revList[3].Count > 0 && board[ix,iy] != PIECE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
@@ -234,9 +242,9 @@ public class main : MonoBehaviour {
 				revList[4].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE.EMPTY && board[ix,iy] != pieceType) {
 				revList[4].Add(new Vector2(ix,iy));
-			} else if (revList[4].Count > 0 && board[ix,iy] > 0) {
+			} else if (revList[4].Count > 0 && board[ix,iy] != PIECE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
@@ -253,9 +261,9 @@ public class main : MonoBehaviour {
 				revList[5].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE.EMPTY && board[ix,iy] != pieceType) {
 				revList[5].Add(new Vector2(ix,iy));
-			} else if (revList[5].Count > 0 && board[ix,iy] > 0) {
+			} else if (revList[5].Count > 0 && board[ix,iy] != PIECE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
@@ -273,9 +281,9 @@ public class main : MonoBehaviour {
 				revList[6].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE.EMPTY && board[ix,iy] != pieceType) {
 				revList[6].Add(new Vector2(ix,iy));
-			} else if (revList[6].Count > 0 && board[ix,iy] > 0) {
+			} else if (revList[6].Count > 0 && board[ix,iy] != PIECE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
@@ -292,9 +300,9 @@ public class main : MonoBehaviour {
 				revList[7].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE.EMPTY && board[ix,iy] != pieceType) {
 				revList[7].Add(new Vector2(ix,iy));
-			} else if (revList[7].Count > 0 && board[ix,iy] > 0) {
+			} else if (revList[7].Count > 0 && board[ix,iy] != PIECE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
