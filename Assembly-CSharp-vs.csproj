@@ -48,6 +48,9 @@
      <Compile Include="Assets\Scripts\hud.cs" />
      <Compile Include="Assets\Scripts\main.cs" />
      <Compile Include="Assets\Scripts\render.cs" />
+ <Reference Include="WebSocket4Net">
+ <HintPath>Assets\Plugins\WebSocket4Net.dll</HintPath>
+ </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
