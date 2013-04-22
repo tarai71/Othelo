@@ -46,10 +46,8 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\controller.cs" />
      <Compile Include="Assets\Scripts\hud.cs" />
-     <Compile Include="Assets\Scripts\inputMouse.cs" />
      <Compile Include="Assets\Scripts\main.cs" />
      <Compile Include="Assets\Scripts\render.cs" />
-     <None Include="Assets\Scripts\main.cs.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -2,36 +2,43 @@ using UnityEngine;
 using System.Collections;
 
 public class main : MonoBehaviour {
-
+	
+	enum GAME_STATUS {
+		PLAY = 0,
+		GAMEOVER
+	}
+	
+	enum PIECE_TYPE {
+		EMPTY = 0,
+		BLACK,
+		WHITE
+	}
+	
 	public GameObject piecePrefab;
 	public GameObject markerPrefab;
 	public GUIStyle labelStyleScore;
 	public GUIStyle labelStylePieceType;
 	public GUIStyle labelStyleGameOver;
 	
-	int[,] board = new int[8,8]{
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0},
-		{0,0,0,0,0,0,0,0}
-	};
+	PIECE_TYPE[,] board = new PIECE_TYPE[8,8];
 	GameObject[,] pieceList = new GameObject[8,8];
-	int pieceType = 0;
+	PIECE_TYPE pieceType = 0;
 	int white = 0;
 	int black = 0;
-	string gamestatus = "play";
+	GAME_STATUS gamestatus = GAME_STATUS.PLAY;
 	ArrayList markerList = new ArrayList();
 		
 	// Use this for initialization
 	void Start () {
-		pieceType = 2; putPiece(new Vector2(3,4));
-		pieceType = 1; putPiece(new Vector2(3,3));
-		pieceType = 1; putPiece(new Vector2(4,4));
-		pieceType = 2; putPiece(new Vector2(4,3));
+		for (int i=0; i<board.GetLength(0); i++) {
+			for (int j=0; j<board.GetLength(1); j++) {
+				board[i,j] = 0;
+			}
+		}
+		pieceType = PIECE_TYPE.WHITE; putPiece(new Vector2(3,4));
+		pieceType = PIECE_TYPE.BLACK; putPiece(new Vector2(3,3));
+		pieceType = PIECE_TYPE.BLACK; putPiece(new Vector2(4,4));
+		pieceType = PIECE_TYPE.WHITE; putPiece(new Vector2(4,3));
 	
 	}
 	
@@ -49,7 +56,7 @@ public class main : MonoBehaviour {
 		if (board[(int)key.x,(int)key.y] != 0) {
 			return;
 		}
-		if (gamestatus != "play") {
+		if (gamestatus != GAME_STATUS.PLAY) {
 			return;
 		}
 			
@@ -73,21 +80,21 @@ public class main : MonoBehaviour {
 			pieceList[(int)key.x, (int)key.y] = (GameObject)Instantiate(piecePrefab, position, rotation);
 			for (int i=0; i<board.GetLength(0); i++) {
 				for (int j=0; j<board.GetLength(1); j++) {
-					if (board[i,j] == 1) {
+					if (board[i,j] == PIECE_TYPE.BLACK) {
 						pieceList[i, j].renderer.material.color = new Color(0,0,0,255);
-					} else if (board[i,j] == 2) {
+					} else if (board[i,j] == PIECE_TYPE.WHITE) {
 						pieceList[i, j].renderer.material.color = new Color(255,255,255,255);
 					}
 				}
 			}
-			pieceType = pieceType == 1 ? 2 : 1;
+			pieceType = pieceType == PIECE_TYPE.BLACK ? PIECE_TYPE.WHITE : PIECE_TYPE.BLACK;
 			// 置くところが無いかチェック/
 			foreach(Object obj in markerList) {
 				Object.Destroy(obj);
 			}
 			ArrayList enablePutList = new ArrayList();
 			if (!checkEnablePut(ref enablePutList) && !initialFlag) {
-				pieceType = pieceType == 1 ? 2 : 1;
+				pieceType = pieceType == PIECE_TYPE.BLACK ? PIECE_TYPE.WHITE : PIECE_TYPE.BLACK;
 				// 攻守交代2回してどこも置けなかったらそのゲームは終了/
 				if (!checkEnablePut(ref enablePutList) && !initialFlag) {
 					StartCoroutine("GameOver");
@@ -105,7 +112,7 @@ public class main : MonoBehaviour {
 	}
 	IEnumerator GameOver() {
 		Debug.Log("game over");
-		gamestatus = "gameover";
+		gamestatus = GAME_STATUS.GAMEOVER;
 		yield return new WaitForSeconds(2.0f);
 		//while (!Input.GetButtonDown("Fire1") || Input.touches.Length > 0) yield return;
 
@@ -140,7 +147,7 @@ public class main : MonoBehaviour {
 				revList[0].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE_TYPE.EMPTY && board[ix,iy] != pieceType) {
 				revList[0].Add(new Vector2(ix, iy));
 			} else if (revList[0].Count > 0 && board[ix,iy] != 0) {
 				changeFlag = true;
@@ -159,7 +166,7 @@ public class main : MonoBehaviour {
 				revList[1].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE_TYPE.EMPTY && board[ix,iy] != pieceType) {
 				revList[1].Add(new Vector2(ix,iy));
 			} else if (revList[1].Count > 0 && board[ix,iy] != 0) {
 				changeFlag = true;
@@ -179,7 +186,7 @@ public class main : MonoBehaviour {
 				revList[2].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE_TYPE.EMPTY && board[ix,iy] != pieceType) {
 				revList[2].Add(new Vector2(ix, iy));
 			} else if (revList[2].Count > 0 && board[ix,iy] != 0) {
 				changeFlag = true;
@@ -198,7 +205,7 @@ public class main : MonoBehaviour {
 				revList[3].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE_TYPE.EMPTY && board[ix,iy] != pieceType) {
 				revList[3].Add(new Vector2(ix, iy));
 			} else if (revList[3].Count > 0 && board[ix,iy] != 0) {
 				changeFlag = true;
@@ -218,9 +225,9 @@ public class main : MonoBehaviour {
 				revList[4].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE_TYPE.EMPTY && board[ix,iy] != pieceType) {
 				revList[4].Add(new Vector2(ix,iy));
-			} else if (revList[4].Count > 0 && board[ix,iy] > 0) {
+			} else if (revList[4].Count > 0 && board[ix,iy] != PIECE_TYPE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
@@ -237,9 +244,9 @@ public class main : MonoBehaviour {
 				revList[5].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE_TYPE.EMPTY && board[ix,iy] != pieceType) {
 				revList[5].Add(new Vector2(ix,iy));
-			} else if (revList[5].Count > 0 && board[ix,iy] > 0) {
+			} else if (revList[5].Count > 0 && board[ix,iy] != PIECE_TYPE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
@@ -257,9 +264,9 @@ public class main : MonoBehaviour {
 				revList[6].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE_TYPE.EMPTY && board[ix,iy] != pieceType) {
 				revList[6].Add(new Vector2(ix,iy));
-			} else if (revList[6].Count > 0 && board[ix,iy] > 0) {
+			} else if (revList[6].Count > 0 && board[ix,iy] != PIECE_TYPE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
@@ -276,9 +283,9 @@ public class main : MonoBehaviour {
 				revList[7].Clear();
 				break;
 			}
-			if (board[ix,iy] > 0 && board[ix,iy] != pieceType) {
+			if (board[ix,iy] != PIECE_TYPE.EMPTY && board[ix,iy] != pieceType) {
 				revList[7].Add(new Vector2(ix,iy));
-			} else if (revList[7].Count > 0 && board[ix,iy] > 0) {
+			} else if (revList[7].Count > 0 && board[ix,iy] != PIECE_TYPE.EMPTY) {
 				changeFlag = true;
 				break;
 			} else {
@@ -293,7 +300,7 @@ public class main : MonoBehaviour {
 				foreach (ArrayList val in revList) {
 					foreach (Vector2 v in val) {
 						pieceList[(int)v.x, (int)v.y].transform.rotation *= Quaternion.AngleAxis(180, new Vector3(1,0,0));
-						board[(int)v.x, (int)v.y] = (board[(int)v.x, (int)v.y] == 1) ? 2 : 1;
+						board[(int)v.x, (int)v.y] = (board[(int)v.x, (int)v.y] == PIECE_TYPE.BLACK) ? PIECE_TYPE.WHITE : PIECE_TYPE.BLACK;
 					} 
 				}
 			}
@@ -308,9 +315,9 @@ public class main : MonoBehaviour {
 		int _black = 0;
 		for (int x=0; x<board.GetLength(0); x++) {
 			for (int y=0; y<board.GetLength(1); y++) {
-				if (board[x,y] == 1) {
+				if (board[x,y] == PIECE_TYPE.BLACK) {
 					_black += 1;
-				} else if (board[x,y] == 2) {
+				} else if (board[x,y] == PIECE_TYPE.WHITE) {
 					_white += 1;
 				}
 			}
@@ -324,11 +331,11 @@ public class main : MonoBehaviour {
 		GUI.Label(rect_score, "WHITE:" + white + "\nBLACK:" + black, labelStyleScore);
 		
 		Rect rect_piece = new Rect(0, 30, Screen.width, Screen.height);
-		var piece = pieceType == 1 ? "black" : "white";
+		var piece = pieceType == PIECE_TYPE.BLACK ? "black" : "white";
 		GUI.Label(rect_piece, piece, labelStylePieceType);
 		
 		Rect rect_gameover = new Rect(0, Screen.height / 2 - 25, Screen.width, 50);
-		if (gamestatus == "gameover") {
+		if (gamestatus == GAME_STATUS.GAMEOVER) {
 			string result = "";
 			if (white > black) {
 				result = "white won!";
