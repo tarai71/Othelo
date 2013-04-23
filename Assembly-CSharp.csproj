@@ -44,10 +44,13 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Scripts\connect.cs" />
      <Compile Include="Assets\Scripts\controller.cs" />
      <Compile Include="Assets\Scripts\hud.cs" />
      <Compile Include="Assets\Scripts\main.cs" />
+     <Compile Include="Assets\Scripts\menu.cs" />
      <Compile Include="Assets\Scripts\render.cs" />
+     <Compile Include="Assets\Scripts\strings.cs" />
  <Reference Include="WebSocket4Net">
  <HintPath>Assets\Plugins\WebSocket4Net.dll</HintPath>
  </Reference>

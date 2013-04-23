@@ -1,11 +1,12 @@
 using UnityEngine;
 using System.Collections;
-
+	
 public class main : MonoBehaviour {
 	
 	enum GAME_STATUS {
 		PLAY = 0,
-		GAMEOVER
+		GAMEOVER,
+		TIMEOVER
 	}
 	
 	enum PIECE_TYPE {
@@ -19,6 +20,7 @@ public class main : MonoBehaviour {
 	public GUIStyle labelStyleScoreBlack;
 	public GUIStyle labelStyleScoreWhite;
 	public GUIStyle labelStyleGameOver;
+	public GUIStyle labelStyleTimer;
 	
 	PIECE_TYPE[,] board = new PIECE_TYPE[8,8];
 	GameObject[,] pieceList = new GameObject[8,8];
@@ -28,11 +30,14 @@ public class main : MonoBehaviour {
 	GAME_STATUS gamestatus = GAME_STATUS.PLAY;
 	ArrayList markerList = new ArrayList();
 		
+	float TimeLimit;
+	float startTime;
+	
 	// Use this for initialization
 	void Start () {
 		for (int i=0; i<board.GetLength(0); i++) {
 			for (int j=0; j<board.GetLength(1); j++) {
-				board[i,j] = 0;
+				board[i,j] = PIECE_TYPE.EMPTY;
 			}
 		}
 		pieceType = PIECE_TYPE.WHITE; putPiece(new Vector2(3,4));
@@ -40,6 +45,7 @@ public class main : MonoBehaviour {
 		pieceType = PIECE_TYPE.BLACK; putPiece(new Vector2(4,4));
 		pieceType = PIECE_TYPE.WHITE; putPiece(new Vector2(4,3));
 	
+		TimeLimit = menu.getLimitTime();
 	}
 	
 	// Update is called once per frame
@@ -61,6 +67,11 @@ public class main : MonoBehaviour {
 			labelStyleScoreWhite.normal.textColor = new Color32(209,221, 48,alfa);
 		}
 		
+		if (TimeLimit > 0f) {
+			if (Time.time - startTime >= TimeLimit) {
+				StartCoroutine("TimeOver");
+			}
+		}
 	}
 
 
@@ -117,9 +128,13 @@ public class main : MonoBehaviour {
 					StartCoroutine("GameOver");
 				}
 			}
-			foreach(Vector2 v in enablePutList) {
-				position = new Vector3(v.x -4.0f + 0.5f, 0.201f, v.y -4.0f + 0.5f);
-				markerList.Add(Instantiate(markerPrefab, position, Quaternion.identity));
+			startTime = Time.time;
+			
+			if (menu.getGuideEnable()) {
+				foreach(Vector2 v in enablePutList) {
+					position = new Vector3(v.x -4.0f + 0.5f, 0.201f, v.y -4.0f + 0.5f);
+					markerList.Add(Instantiate(markerPrefab, position, Quaternion.identity));
+				}
 			}
 			enablePutList.Clear();
 		} else {
@@ -142,7 +157,7 @@ public class main : MonoBehaviour {
 			}
 		}
 		Debug.Log(_s);
-}
+	}
 	
 	IEnumerator GameOver() {
 		Debug.Log("game over");
@@ -153,7 +168,15 @@ public class main : MonoBehaviour {
 		Application.LoadLevel("Main");
 	}
 	
+	IEnumerator TimeOver() {
+		Debug.Log("time over");
+		gamestatus = GAME_STATUS.TIMEOVER;
+		yield return new WaitForSeconds(2.0f);
+		//while (!Input.GetButtonDown("Fire1") || Input.touches.Length > 0) yield return;
 
+		Application.LoadLevel("Main");
+	}
+	
 	// 置ける場所があるかどうか検索/
 	bool checkEnablePut(ref ArrayList list) {
 		for (int x=0; x<board.GetLength(0); x++) {
@@ -361,20 +384,44 @@ public class main : MonoBehaviour {
 	}
 	
 	void OnGUI() {
-		GUI.Box(new Rect(10,10,100,80), "BLACK");
+		GUI.Box(new Rect(10,10,100,80), StringTable.BLACK);
 		GUI.Label(new Rect(10,10,100,80), black.ToString("d2"), labelStyleScoreBlack);
-		GUI.Box(new Rect(10,100,100,80), "WHITE");
+		GUI.Box(new Rect(10,100,100,80), StringTable.WHITE);
 		GUI.Label(new Rect(10,100,100,80), white.ToString("d2"), labelStyleScoreWhite);
 
+		if (TimeLimit > 0f) {
+			float restTime = TimeLimit - (Time.time - startTime);
+			if (restTime < 0f) restTime = 0f;
+			GUI.Box(new Rect(10,220,150,80), StringTable.TIMER);
+			GUI.Label(new Rect(10,220,150,80), restTime.ToString("f02"), labelStyleTimer);
+			if (restTime < 3f) {
+				labelStyleTimer.normal.textColor = new Color32(230,0,0,255);
+			} else {
+				labelStyleTimer.normal.textColor = new Color32(57,196,225,255);
+			}
+		}
+		
 		Rect rect_gameover = new Rect(Screen.width / 2 - 300, Screen.height / 2 - 50, 600, 100);
 		if (gamestatus == GAME_STATUS.GAMEOVER) {
 			string result = "";
 			if (white > black) {
-				result = "WHITE WON!";
+				result = StringTable.WIN_WHITE;
 			} else if (white < black) {
-				result = "BLACK WON!";
+				result = StringTable.WIN_BLACK;
 			} else {
-				result = "DRAW";
+				result = StringTable.DRAW;
+			}
+			GUI.Box(rect_gameover, "");
+			GUI.Box(rect_gameover, "");
+			GUI.Label(rect_gameover, result, labelStyleGameOver);
+		} else if (gamestatus == GAME_STATUS.TIMEOVER) {
+			string result = "";
+			if (pieceType == PIECE_TYPE.BLACK) {
+				result = StringTable.WIN_WHITE;
+			} else if (pieceType == PIECE_TYPE.WHITE){
+				result = StringTable.WIN_BLACK;
+			} else {
+				result = StringTable.DRAW;
 			}
 			GUI.Box(rect_gameover, "");
 			GUI.Box(rect_gameover, "");
